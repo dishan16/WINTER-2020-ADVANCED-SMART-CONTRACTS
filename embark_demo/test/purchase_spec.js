@@ -61,18 +61,36 @@ contract("Purchase", function () {
 
   it("Buyer confirm received", async function(){
     // test here
+    //buyer's address
+    let contractBuyerAddress = await Purchase.buyer(); 
+    //Seller's address
+    let contractSellerAddress = await Purchase.seller();
+    assert.ok(contractBuyerAddress == buyerAddress);
+    assert.ok(contractSellerAddress == sellerAddress);
+    //check balance
+    let sellerBalanceOld = await web3.eth.getBalance(contractSellerAddress); 
+    let contractBalanceOld = await web3.eth.getBalance(Purchase.options.address);
+    //calling the function
+    let confirmReceiveTx = await Purchase.methods.confirmReceived().send({
+      from: buyerAddress
+    });
   })
 
   it("Seller aborts item", async function(){
     // test here
   })
-
+  let contractState = await Purchase.state(); 
+  let contractBalanceNew = await web3.eth.getBalance(Purchase.options.address); 
+  let sellerBalanceNew = await web3.eth.getBalance(contractSellerAddress);
   // it("set storage value", async function () {
   //   await SimpleStorage.methods.set(150).send({from: web3.eth.defaultAccount});
   //   let result = await SimpleStorage.methods.get().call();
   //   assert.strictEqual(parseInt(result, 10), 150);
   // });
-
+  assert.ok(contractBalanceNew == 0,);
+  assert.ok((new BigNumber(sellerBalanceNew)).minus(sellerBalanceOld) == price,);
+  assert.ok((new BigNumber(contractBalanceOld)).minus(contractBalanceNew) == price,);
+  assert.ok(contractState == state["INACTIVE"]);
   // it("should have account with balance", async function() {
   //   let balance = await web3.eth.getBalance(accounts[0]);
   //   assert.ok(parseInt(balance, 10) > 0);
